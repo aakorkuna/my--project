@@ -1,0 +1,149 @@
+{
+  "v": 1,
+  "id": "20260213_110554_122_n4a2yw",
+  "savedAt": 1770973554122,
+  "label": "мульт",
+  "state": {
+    "board": {
+      "0,0": {
+        "tileId": "start_city_road_corner",
+        "x": 0,
+        "y": 0,
+        "rotation": 0
+      },
+      "1,0": {
+        "tileId": "city_edge_road_corner_es",
+        "x": 1,
+        "y": 0,
+        "rotation": 90
+      },
+      "2,0": {
+        "tileId": "city_edge_road_corner_sw",
+        "x": 2,
+        "y": 0,
+        "rotation": 270
+      },
+      "0,-1": {
+        "tileId": "city_edge",
+        "x": 0,
+        "y": -1,
+        "rotation": 180
+      },
+      "1,-1": {
+        "tileId": "city_edge",
+        "x": 1,
+        "y": -1,
+        "rotation": 0
+      }
+    },
+    "deck": [
+      "start_city_road_corner",
+      "start_city_road_corner",
+      "start_city_road_corner",
+      "church",
+      "church",
+      "church",
+      "church",
+      "church_road",
+      "church_road",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_straight",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_corner",
+      "road_t",
+      "road_t",
+      "road_t",
+      "road_t",
+      "road_cross",
+      "city_edge",
+      "city_edge",
+      "city_edge",
+      "city_opposite_connected_shield",
+      "city_opposite_connected_shield",
+      "city_opposite_connected",
+      "city_opposite_disconnected",
+      "city_opposite_disconnected",
+      "city_opposite_disconnected",
+      "city_corner",
+      "city_corner",
+      "city_corner",
+      "city_corner_disconnected",
+      "city_corner_disconnected",
+      "city_corner_shield",
+      "city_corner_shield",
+      "city_corner_shield_road_corner_es",
+      "city_corner_shield_road_corner_es",
+      "city_corner_road_corner_es",
+      "city_corner_road_corner_es",
+      "city_corner_road_corner_es",
+      "city_3sides_shield",
+      "city_3sides",
+      "city_3sides",
+      "city_3sides",
+      "city_3sides_road_shield",
+      "city_3sides_road_shield",
+      "city_3sides_road",
+      "city_edge_road_corner_es",
+      "city_edge_road_corner_es",
+      "city_edge_road_corner_sw",
+      "city_edge_road_corner_sw",
+      "city_edge_roads_3",
+      "city_edge_roads_3",
+      "city_edge_roads_3",
+      "city_full_shield"
+    ],
+    "active": {
+      "tileId": "road_corner",
+      "rotation": 0
+    },
+    "score": 0,
+    "playerCount": 4,
+    "currentPlayer": 0,
+    "scores": [
+      0,
+      4,
+      4,
+      0
+    ],
+    "meeplesRemaining": 7,
+    "meeplesRemainingByPlayer": [
+      7,
+      8,
+      8,
+      7
+    ],
+    "meeples": [
+      {
+        "x": 1,
+        "y": 0,
+        "feature": {
+          "kind": "road",
+          "dir": "S"
+        },
+        "player": 0
+      },
+      {
+        "x": 1,
+        "y": -1,
+        "feature": {
+          "kind": "city",
+          "dir": "N"
+        },
+        "player": 3
+      }
+    ],
+    "meepleTarget": null
+  }
+}

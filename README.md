@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Carcassonne (web)
 
-## Getting Started
+[Українська версія](README.ua.md)
 
-First, run the development server:
+A small Carcassonne-style web game built with Next.js + React Three Fiber.
+
+## What’s included
+
+- **Solo** mode
+- **Multiplayer Offline** (hotseat, 1–5 players, turn-by-turn)
+- **Multiplayer Online (LAN)** rooms (Socket.IO, simplest host-authoritative model)
+- **File saves** (separate save buckets for solo vs multiplayer)
+- **Rules**: in-app “Site rules” + external PDF “Game rules” link
+
+## Controls
+
+- **Place a tile**: click a highlighted empty cell
+- **Rotate tile**: `R` (or the Rotate button)
+- **Skip meeple placement**: `Esc` (or `Next` in multiplayer)
+
+## Requirements
+
+- Node.js 18+ (recommended)
+
+## Run locally
+
+From the `my-app/` folder:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Note: `npm run dev` runs `server.mjs`, which starts Next.js **and** Socket.IO on the same port.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Play Online on LAN
 
-## Learn More
+1. Run the app on the host machine: `npm run dev`
+2. Make sure the host firewall allows incoming TCP connections on port `3000`
+3. On other devices in the same network, open:
 
-To learn more about Next.js, take a look at the following resources:
+```
+http://<HOST_LAN_IP>:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Then use **Multiplayer → Online** (or open `/online`) to create/join a room.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Saves
 
-## Deploy on Vercel
+File saves are written as JSON files under:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/game/store/save/saves/solo/`
+- `src/game/store/save/saves/multi/`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+These are dev-friendly local files (they are not meant for serverless deployments where the filesystem is ephemeral).
+
+## Project map (high level)
+
+- `app/` — Next.js App Router pages (menu, solo, online, API routes)
+- `src/game/store/useGameStore.ts` — Zustand store (game logic + persistence)
+- `src/scene/components/` — board / tile / meeple rendering (React Three Fiber)
+

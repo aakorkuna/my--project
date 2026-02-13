@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Carcassonne — Fantasy Mock</title>
+
+    <!-- Decorative, Carcassonne-like vibe (demo only) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        /* parchment + ink */
+        --bg: #efe2c6;
+        --bg2: #e4d1a6;
+        --ink: #241a12;
+        --inkSoft: rgba(36, 26, 18, 0.72);
+
+        /* metal + gem */
+        --steel: #2b2a2a;
+        --bronze: #9a6b2f;
+        --bronze2: #d7b067;
+        --emerald: #2f6f57;
+
+        /* UI */
+        --panel: rgba(255, 255, 255, 0.52);
+        --panel2: rgba(255, 255, 255, 0.32);
+        --border: rgba(36, 26, 18, 0.25);
+        --borderStrong: rgba(36, 26, 18, 0.45);
+        --shadow: rgba(0, 0, 0, 0.18);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: "IM Fell English", ui-serif, Georgia, serif;
+
+        /* Background scene is rendered by the fixed image below */
+        background: #0b0e14;
+      }
+
+      .pixel-scene {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+        background: #0b0e14;
+      }
+
+      .pixel-scene .bg-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+        /* keep pixel-art crisp when scaled */
+        image-rendering: pixelated;
+      }
+
+      /* Soft vignette so the menu stays readable */
+      .pixel-scene::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(1000px circle at 50% 35%, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.42) 76%);
+      }
+
+      .wrap {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* big decorative background title */
+      .bg-title {
+        position: absolute;
+        top: 7vh;
+        left: 50%;
+        transform: translateX(-50%);
+        user-select: none;
+        pointer-events: none;
+        white-space: nowrap;
+        opacity: 0.78;
+      }
+
+      .bg-title .word {
+        font-family: "Cinzel Decorative", ui-serif, Georgia, serif;
+        letter-spacing: 0.22em;
+        font-weight: 700;
+        font-size: clamp(64px, 9vw, 140px);
+        line-height: 1;
+        display: flex;
+        align-items: baseline;
+
+        /* engraved gold-ish text */
+        background: linear-gradient(180deg, var(--bronze2), var(--bronze));
+        background: linear-gradient(
+          180deg,
+          color-mix(in srgb, #fff6b8 86%, white),
+          color-mix(in srgb, #ffe06a 88%, white),
+          color-mix(in srgb, var(--bronze2) 78%, #ffdf5b),
+          color-mix(in srgb, var(--bronze) 92%, black)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(0, 0, 0, 0.22);
+        text-shadow:
+          /* pixel-ish hard shadow */
+          2px 2px 0 rgba(0, 0, 0, 0.26),
+          0 1px 0 rgba(255, 255, 255, 0.46),
+          0 0 28px rgba(255, 232, 120, 0.56),
+          0 0 72px rgba(255, 232, 120, 0.28);
+      }
+
+      .bg-title .word .c {
+        font-size: 1.85em;
+        letter-spacing: 0.02em;
+        margin-right: 0.06em;
+      }
+
+      .bg-title .word .rest {
+        letter-spacing: 0.22em;
+      }
+
+      /* “pixel” frame feel: stepped border via box-shadow */
+      .panel {
+        width: min(560px, 92vw);
+        border-radius: 0;
+        position: relative;
+        padding: 26px;
+        margin-top: clamp(90px, 14vh, 170px);
+        background: rgba(255, 255, 255, 0.46);
+        border: 2px solid rgba(36, 26, 18, 0.35);
+        box-shadow:
+          /* pixel frame */
+          0 0 0 2px rgba(239, 226, 198, 0.9) inset,
+          0 0 0 4px rgba(36, 26, 18, 0.18) inset,
+          0 18px 0 rgba(0, 0, 0, 0.06);
+      }
+
+      .panel::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 0;
+        border: 2px solid rgba(36, 26, 18, 0.14);
+        background:
+          radial-gradient(900px circle at 30% 20%, rgba(154, 107, 47, 0.10), transparent 55%),
+          radial-gradient(700px circle at 80% 70%, rgba(47, 111, 87, 0.08), transparent 60%),
+          transparent;
+        pointer-events: none;
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 2px 6px 14px;
+        border-bottom: 1px solid rgba(36, 26, 18, 0.12);
+        margin-bottom: 16px;
+      }
+
+      .panel-title {
+        font-family: "Cinzel Decorative", ui-serif;
+        font-size: 20px;
+        letter-spacing: 0.12em;
+      }
+
+      .badge {
+        font-size: 13px;
+        opacity: 0.75;
+        letter-spacing: 0.08em;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .btn {
+        /* make the UI clearly pixel-style */
+        font-family: "Press Start 2P", ui-monospace, monospace;
+        letter-spacing: 0.04em;
+        font-weight: 400;
+
+        width: 100%;
+        padding: 14px 14px;
+        border-radius: 0;
+        border: 2px solid rgba(36, 26, 18, 0.45);
+        background: rgba(255, 255, 255, 0.26);
+        color: var(--ink);
+
+        box-shadow:
+          0 0 0 2px rgba(239, 226, 198, 0.9) inset,
+          4px 4px 0 rgba(0, 0, 0, 0.18);
+
+        text-transform: uppercase;
+        text-align: center;
+        cursor: default;
+      }
+
+      .btn--primary {
+        border-color: rgba(154, 107, 47, 0.55);
+        background:
+          rgba(215, 176, 103, 0.26);
+      }
+
+      .btn--gem {
+        border-color: rgba(47, 111, 87, 0.45);
+        background:
+          rgba(99, 175, 142, 0.20);
+      }
+
+      .hint {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 0;
+        border: 2px solid rgba(36, 26, 18, 0.14);
+        background: rgba(255, 255, 255, 0.22);
+        color: var(--inkSoft);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .corner {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(36, 26, 18, 0.28);
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 0;
+        opacity: 0.75;
+      }
+      .corner.tr { right: 10px; top: 10px; transform: rotate(90deg); }
+      .corner.bl { left: 10px; bottom: 10px; transform: rotate(-90deg); }
+      .corner.br { right: 10px; bottom: 10px; transform: rotate(180deg); }
+      .corner.tl { left: 10px; top: 10px; }
+
+      @media (max-width: 520px) {
+        .panel { padding: 20px; }
+        .btn { padding: 12px; font-size: 12px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="pixel-scene" aria-hidden="true">
+      <img class="bg-img" src="./11.jpg" alt="" />
+    </div>
+
+    <div class="wrap">
+      <div class="bg-title" aria-hidden="true">
+        <div class="word"><span class="c">C</span><span class="rest">ARCASSONNE</span></div>
+      </div>
+
+      <section class="panel" aria-label="Main Menu Mock">
+        <span class="corner tl"></span>
+        <span class="corner tr"></span>
+        <span class="corner bl"></span>
+        <span class="corner br"></span>
+
+        <div class="panel-head">
+          <div class="panel-title">MAIN MENU</div>
+          <div class="badge">STATIC PREVIEW</div>
+        </div>
+
+        <div class="grid">
+          <div class="btn">TEST (TILES LIST)</div>
+          <div class="btn btn--primary">TRY SOLO</div>
+          <div class="btn btn--gem">MULTIPLAYER</div>
+          <div class="btn">RULES</div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
