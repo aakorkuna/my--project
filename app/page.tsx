@@ -105,23 +105,32 @@ export default function Page() {
   }
 
   return (
-    <main className="menu-bg min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute inset-0 select-none pointer-events-none">
-        <div className="absolute left-1/2 top-[10%] -translate-x-1/2">
-          <div className={`${carcTitle.className} flex items-baseline tracking-[0.22em] opacity-[0.07]`}>
-            <span className="text-[clamp(120px,18vw,260px)] leading-none">C</span>
-            <span className="text-[clamp(64px,10vw,150px)] leading-none">ARCASSONNE</span>
-          </div>
+    <main className="scroll-home scroll-wrap">
+      <div className="scroll-scene" aria-hidden="true">
+        <img className="scroll-scene__img" src="/teory.jpg" alt="" />
+      </div>
+
+      <div className="carc-bg-title" aria-hidden="true">
+        <div className={`${carcTitle.className} carc-engraved`}>
+          <span className="carc-c">C</span>
+          <span className="carc-rest">ARCASSONNE</span>
         </div>
       </div>
 
       <div className="w-full max-w-xl relative">
-        <div className="rounded-3xl border border-foreground/15 bg-background/60 backdrop-blur px-8 py-10">
+        <section className="scroll-panel" aria-label="Main Menu">
+          <span className="scroll-rod scroll-rod--top" aria-hidden="true"></span>
+          <span className="scroll-rod scroll-rod--bottom" aria-hidden="true"></span>
+
+          <div className="scroll-panel-head">
+            <div className={`scroll-panel-title ${carcTitle.className}`}>MAIN MENU</div>
+          </div>
+
           {!soloMenuOpen && !multiMenuOpen && !rulesMenuOpen ? (
-            <div className="grid gap-4">
+            <div className="scroll-grid">
               <Link
                 href="/tiles"
-                className="carc-btn text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                className="scroll-btn"
               >
                 Test (Tiles List)
               </Link>
@@ -129,7 +138,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setSoloMenuOpen(true)}
-                className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                className="scroll-btn scroll-btn--primary"
               >
                 Try Solo
               </button>
@@ -140,7 +149,7 @@ export default function Page() {
                   setMultiStep("choose");
                   setMultiMenuOpen(true);
                 }}
-                className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                className="scroll-btn scroll-btn--gem"
               >
                 Multiplayer
               </button>
@@ -148,18 +157,18 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setRulesMenuOpen(true)}
-                className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                className="scroll-btn"
               >
                 Rules
               </button>
             </div>
           ) : rulesMenuOpen ? (
             rulesStep === "choose" ? (
-              <div className="grid gap-4">
+              <div className="scroll-grid">
                 <button
                   type="button"
                   onClick={() => setRulesMenuOpen(false)}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn"
                 >
                   Back
                 </button>
@@ -167,7 +176,7 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={() => setRulesStep("site")}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn"
                 >
                   Site Rules
                 </button>
@@ -176,18 +185,18 @@ export default function Page() {
                   href="https://desktopgames.com.ua/games/6455/%D0%9A%D0%B0%D1%80%D0%BA%D0%B0%D1%81%D0%BE%D0%BD_%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%B0.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="carc-btn text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn"
                 >
                   Game Rules (PDF)
                 </a>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div className="scroll-grid">
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => setRulesStep("choose")}
-                    className="flex-1 text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-3 text-base font-semibold"
+                    className="scroll-btn flex-1"
                   >
                     Back
                   </button>
@@ -195,7 +204,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={() => setRulesLang((l) => (l === "uk" ? "en" : "uk"))}
-                    className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-3 text-base font-semibold"
+                    className="scroll-btn"
                     aria-label="Toggle language"
                     title="Toggle language"
                   >
@@ -203,7 +212,7 @@ export default function Page() {
                   </button>
                 </div>
 
-                <div className="rounded-3xl border border-foreground/15 bg-background/40 px-6 py-5">
+                <div className="scroll-card">
                   <div className="text-lg font-semibold">{rulesLang === "uk" ? "Правила сайту" : "Site rules"}</div>
                   <div className="text-sm opacity-80 mt-1">
                     {rulesLang === "uk"
@@ -339,18 +348,18 @@ export default function Page() {
             )
           ) : soloMenuOpen ? (
             !savesOpen ? (
-              <div className="grid gap-4">
+              <div className="scroll-grid">
                 <button
                   type="button"
                   onClick={() => setSoloMenuOpen(false)}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn"
                 >
                   Back
                 </button>
 
                 <Link
                   href="/solo"
-                  className="carc-btn text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn scroll-btn--primary"
                 >
                   New Game
                 </Link>
@@ -361,38 +370,38 @@ export default function Page() {
                     setSavesOpen(true);
                     await refreshSaves();
                   }}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                  className="scroll-btn scroll-btn--gem"
                 >
                   Save
                 </button>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div className="scroll-grid">
                 <button
                   type="button"
                   onClick={() => {
                     setSavesOpen(false);
                     setHoveredSaveId(null);
                   }}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-3 text-base font-semibold"
+                  className="scroll-btn"
                 >
                   Back
                 </button>
 
                 {savesLoading && (
-                  <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm opacity-80">
+                  <div className="scroll-note">
                     Loading saves…
                   </div>
                 )}
 
                 {!savesLoading && savesErr && (
-                  <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm text-red-400">
+                  <div className="scroll-note text-red-400">
                     {savesErr}
                   </div>
                 )}
 
                 {!savesLoading && !savesErr && saves.length === 0 && (
-                  <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm opacity-80">
+                  <div className="scroll-note">
                     Немає сейвів.
                   </div>
                 )}
@@ -404,26 +413,26 @@ export default function Page() {
                       const hovered = hoveredSaveId === s.id;
 
                       return (
-                        <button
+                        <div
                           key={s.id}
-                          type="button"
+                          className="relative"
                           onMouseEnter={() => setHoveredSaveId(s.id)}
                           onMouseLeave={() => setHoveredSaveId((cur) => (cur === s.id ? null : cur))}
-                          onClick={() => {
-                            router.push(`/solo?fileSave=${encodeURIComponent(s.id)}&fileSaveMode=solo`);
-                          }}
-                          className={
-                            "relative text-left rounded-2xl border bg-background/60 px-5 py-4 text-base font-semibold transition-colors " +
-                            (hovered ? "border-foreground/60" : "border-foreground/20")
-                          }
                         >
-                          <div className="pr-10">{label}</div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push(`/solo?fileSave=${encodeURIComponent(s.id)}&fileSaveMode=solo`);
+                            }}
+                            className={hovered ? "scroll-btn scroll-btn--list scroll-btn--hover" : "scroll-btn scroll-btn--list"}
+                          >
+                            <div className="pr-10">{label}</div>
+                          </button>
 
                           {hovered && (
                             <button
                               type="button"
-                              onClick={async (e) => {
-                                e.stopPropagation();
+                              onClick={async () => {
                                 const res = await deleteGameFile(s.id, "solo");
                                 if (!res.ok) {
                                   setSavesErr(res.reason ?? "Не вдалося видалити сейв");
@@ -453,7 +462,7 @@ export default function Page() {
                               </svg>
                             </button>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -461,13 +470,13 @@ export default function Page() {
               </div>
             )
           ) : (
-            <div className="grid gap-4">
+            <div className="scroll-grid">
               {multiStep === "choose" ? (
                 <>
                   <button
                     type="button"
                     onClick={() => setMultiMenuOpen(false)}
-                    className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                    className="scroll-btn"
                   >
                     Back
                   </button>
@@ -475,7 +484,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={() => router.push("/online")}
-                    className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                    className="scroll-btn scroll-btn--gem"
                   >
                     Online
                   </button>
@@ -483,7 +492,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={() => setMultiStep("offline")}
-                    className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                    className="scroll-btn scroll-btn--primary"
                   >
                     Offline
                   </button>
@@ -495,7 +504,7 @@ export default function Page() {
                       <button
                         type="button"
                         onClick={() => setMultiStep("choose")}
-                        className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                        className="scroll-btn"
                       >
                         Back
                       </button>
@@ -507,7 +516,7 @@ export default function Page() {
                           setPlayersCount("2");
                           setPlayersModalOpen(true);
                         }}
-                        className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                        className="scroll-btn scroll-btn--primary"
                       >
                         New Game
                       </button>
@@ -518,38 +527,38 @@ export default function Page() {
                           setMultiSavesOpen(true);
                           await refreshMultiSaves();
                         }}
-                        className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-4 text-lg font-semibold"
+                        className="scroll-btn scroll-btn--gem"
                       >
                         Save
                       </button>
                     </>
                   ) : (
-                    <div className="grid gap-3">
+                    <div className="scroll-grid">
                       <button
                         type="button"
                         onClick={() => {
                           setMultiSavesOpen(false);
                           setMultiHoveredSaveId(null);
                         }}
-                        className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-6 py-3 text-base font-semibold"
+                        className="scroll-btn"
                       >
                         Back
                       </button>
 
                       {multiSavesLoading && (
-                        <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm opacity-80">
+                        <div className="scroll-note">
                           Loading saves…
                         </div>
                       )}
 
                       {!multiSavesLoading && multiSavesErr && (
-                        <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm text-red-400">
+                        <div className="scroll-note text-red-400">
                           {multiSavesErr}
                         </div>
                       )}
 
                       {!multiSavesLoading && !multiSavesErr && multiSaves.length === 0 && (
-                        <div className="rounded-2xl border border-foreground/15 bg-background/40 px-5 py-4 text-sm opacity-80">
+                        <div className="scroll-note">
                           Немає сейвів.
                         </div>
                       )}
@@ -561,26 +570,26 @@ export default function Page() {
                             const hovered = multiHoveredSaveId === s.id;
 
                             return (
-                              <button
+                              <div
                                 key={s.id}
-                                type="button"
+                                className="relative"
                                 onMouseEnter={() => setMultiHoveredSaveId(s.id)}
                                 onMouseLeave={() => setMultiHoveredSaveId((cur) => (cur === s.id ? null : cur))}
-                                onClick={() => {
-                                  router.push(`/solo?fileSave=${encodeURIComponent(s.id)}&fileSaveMode=multi`);
-                                }}
-                                className={
-                                  "relative text-left rounded-2xl border bg-background/60 px-5 py-4 text-base font-semibold transition-colors " +
-                                  (hovered ? "border-foreground/60" : "border-foreground/20")
-                                }
                               >
-                                <div className="pr-10">{label}</div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    router.push(`/solo?fileSave=${encodeURIComponent(s.id)}&fileSaveMode=multi`);
+                                  }}
+                                  className={hovered ? "scroll-btn scroll-btn--list scroll-btn--hover" : "scroll-btn scroll-btn--list"}
+                                >
+                                  <div className="pr-10">{label}</div>
+                                </button>
 
                                 {hovered && (
                                   <button
                                     type="button"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
+                                    onClick={async () => {
                                       const res = await deleteGameFile(s.id, "multi");
                                       if (!res.ok) {
                                         setMultiSavesErr(res.reason ?? "Не вдалося видалити сейв");
@@ -610,7 +619,7 @@ export default function Page() {
                                     </svg>
                                   </button>
                                 )}
-                              </button>
+                              </div>
                             );
                           })}
                         </div>
@@ -621,14 +630,15 @@ export default function Page() {
               )}
             </div>
           )}
+
+        </section>
         </div>
-      </div>
 
       {playersModalOpen && (
         <div className="fixed inset-0 z-20 flex items-center justify-center p-3">
-          <div className="absolute inset-0 bg-foreground/30" />
+          <div className="absolute inset-0 bg-black/40" />
 
-          <div className="relative w-full max-w-md rounded-3xl border border-foreground/20 bg-background/80 backdrop-blur px-6 py-6">
+          <div className="relative scroll-dialog">
             <div className="text-lg font-semibold">Нова офлайн гра</div>
             <div className="text-sm opacity-80 mt-1">Введіть кількість гравців від 1 до 5</div>
 
@@ -655,7 +665,7 @@ export default function Page() {
                   setPlayersCount(e.target.value);
                 }}
                 placeholder="2"
-                className="w-full rounded-2xl border border-foreground/20 bg-background/60 px-4 py-3 text-base font-medium outline-none"
+                className="scroll-input"
               />
 
               {playersErr && <div className="text-sm text-red-400">{playersErr}</div>}
@@ -667,14 +677,14 @@ export default function Page() {
                     setPlayersModalOpen(false);
                     setPlayersErr(null);
                   }}
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-4 py-3 text-base font-semibold"
+                  className="scroll-btn"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="text-center rounded-2xl border border-foreground/20 bg-background/60 px-4 py-3 text-base font-semibold"
+                  className="scroll-btn scroll-btn--primary"
                 >
                   Start
                 </button>
