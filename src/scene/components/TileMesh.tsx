@@ -3,6 +3,7 @@ import * as THREE from "three";
 import type { MeepleFeature, MeeplePlacement, TileDefinition, Rotation, EdgeDir } from "../../game/model/types";
 import { rotateDir, rotateEdges } from "../../game/logic/rotate";
 import { MeepleMesh } from "./MeepleMesh";
+import { CastleWall, House, MedievalRoad, Monastery, Tower, Tree } from "./TileScenery";
 
 const TILE_SIZE = 1;
 const HALF = TILE_SIZE / 2;
@@ -15,7 +16,7 @@ const WALL_HEIGHT = 0.08;
 // thicknesses
 const WALL_THICKNESS = 0.04;
 const ROAD_THICKNESS = 0.02;
-const ROAD_WIDTH = 0.16;
+const DIR_ANGLE: Record<EdgeDir, number> = { N: 0, E: -Math.PI / 2, S: Math.PI, W: Math.PI / 2 };
 
 function makeShieldGeometry(width: number, height: number, depth: number): THREE.BufferGeometry {
   // 2D shield silhouette in the X/Y plane, then extruded along +Z.
@@ -85,19 +86,6 @@ function wallBetween(
     rotY,
     size: [thickness, height, len],
   };
-}
-
-function cityDiagonalWalls(dir: EdgeDir, y: number, thickness: number, height: number): WallSeg[] {
-  const c = { x: 0, z: 0 }; // center
-
-  const { a, b } = cityTriangleCorners(dir);
-
-  // IMPORTANT: only the two diagonals (center -> each corner).
-  // No wall on the outer tile edge.
-  return [
-    wallBetween(c, a, y, thickness, height),
-    wallBetween(c, b, y, thickness, height),
-  ];
 }
 
 function makeTriangleExtrude(dir: EdgeDir, height: number) {
@@ -233,20 +221,6 @@ function getCityStripGeom(dir: EdgeDir, hubHalf: number, height: number): THREE.
   return geom;
 }
 
-function cityDiagonalWallsFromHub(
-  dir: EdgeDir,
-  hub: { x: number; z: number },
-  y: number,
-  thickness: number,
-  height: number
-): WallSeg[] {
-  const { a, b } = cityTriangleCorners(dir);
-  return [
-    wallBetween(hub, a, y, thickness, height),
-    wallBetween(hub, b, y, thickness, height),
-  ];
-}
-
 function cityCornerPoint(corner: "NW" | "NE" | "SE" | "SW"): { x: number; z: number } {
   switch (corner) {
     case "NW":
@@ -353,13 +327,9 @@ export function TileMesh(props: {
     // Filter out any dirs that are not city after rotation (defensive)
     .map((g) => g.filter((d) => edges[d].terrain === "city"));
 
-  const landColor = "#2f7d3d";
-  const cityColor = "#e4c04a"; // yellow
-  const wallColor = "#b31919"; // red
-  const roadColor = "#7a5a3a";
-  const accentBlue = "#2b6cff";
-  const shieldColor = "#14b8a6"; // turquoise
-  const junctionMarkerColor = "#d97706";
+  const landColor = "#789451";
+  const cityColor = "#b9aa87"; // sandstone courtyard
+  const shieldColor = "#3167a8";
 
   const baseTopY = BASE_THICKNESS / 2;
   const roadY = baseTopY + 0.01;
@@ -369,7 +339,6 @@ export function TileMesh(props: {
   // Sink a bit into the city top so there's no visible gap
   const wallY = cityTopY + WALL_HEIGHT / 2 - 0.01;
 
-  const shieldY = cityTopY + 0.018;
 
   const isChurch = def.id === "church" || def.id === "church_road";
 
@@ -407,13 +376,13 @@ export function TileMesh(props: {
     const o = 0.33;
     switch (dir) {
       case "N":
-        return [0, meepleY, -o];
+        return [0, cityTopY + 0.01, -o];
       case "S":
-        return [0, meepleY, o];
+        return [0, cityTopY + 0.01, o];
       case "E":
-        return [o, meepleY, 0];
+        return [o, cityTopY + 0.01, 0];
       case "W":
-        return [-o, meepleY, 0];
+        return [-o, cityTopY + 0.01, 0];
     }
   }
 
@@ -422,18 +391,6 @@ export function TileMesh(props: {
   const hasAnyCity = edges.N.terrain === "city" || edges.E.terrain === "city" || edges.S.terrain === "city" || edges.W.terrain === "city";
   const isRoadJunction = !hasAnyCity && (roadCount === 3 || roadCount === 4);
   const showJunctionMarker = isRoadJunction || def.id === "city_edge_roads_3";
-  const churchCube = { size: 0.12, height: 0.1 };
-  const churchCubeY = baseTopY + churchCube.height / 2;
-  const cross = {
-    thickness: churchCube.size * 0.12,
-    height: 0.02,
-    verticalLen: churchCube.size * 0.85,
-    horizontalLen: churchCube.size * 0.55,
-  };
-  const crossY = baseTopY + churchCube.height + cross.height / 2 + 0.002;
-  // Move the horizontal bar towards the "top" end of the vertical stroke (in tile plane).
-  const crossHorizontalZOffset = -cross.verticalLen * 0.18;
-
   const hint = {
     radiusChurch: 0.14,
     radiusEdge: 0.12,
@@ -443,7 +400,7 @@ export function TileMesh(props: {
 
   const landTopY = baseTopY;
   const roadTopY = roadY + ROAD_THICKNESS / 2;
-  const churchTopY = baseTopY + churchCube.height;
+  const churchTopY = baseTopY + 0.34;
 
   function surfaceYForDir(dir: EdgeDir): number {
     let y = landTopY;
@@ -472,37 +429,20 @@ export function TileMesh(props: {
         <meshStandardMaterial color={landColor} transparent opacity={opacity} />
       </mesh>
 
-      {isChurch && (
-        <group>
-          {/* church cube */}
-          <mesh position={[0, churchCubeY, 0]} castShadow>
-            <boxGeometry args={[churchCube.size, churchCube.height, churchCube.size]} />
-            <meshStandardMaterial color={accentBlue} transparent opacity={opacity} />
-          </mesh>
-
-          {/* cross (kept within the cube footprint) */}
-          <mesh position={[0, crossY, 0]} castShadow>
-            {/* vertical stroke (longer) */}
-            <boxGeometry args={[cross.thickness, cross.height, cross.verticalLen]} />
-            <meshStandardMaterial color={cityColor} transparent opacity={opacity} />
-          </mesh>
-          <mesh position={[0, crossY, crossHorizontalZOffset]} castShadow>
-            {/* horizontal stroke (shorter) */}
-            <boxGeometry args={[cross.horizontalLen, cross.height, cross.thickness]} />
-            <meshStandardMaterial color={cityColor} transparent opacity={opacity} />
-          </mesh>
+      {(["N", "E", "S", "W"] as const).filter(dir => edges[dir].terrain === "land").map(dir => (
+        <group key={`grove-${dir}`} rotation={[0, DIR_ANGLE[dir], 0]}>
+          <Tree position={[-0.19, baseTopY, -0.36]} opacity={opacity} />
+          <Tree position={[0.19, baseTopY, -0.37]} opacity={opacity} variant={1} />
         </group>
-      )}
+      ))}
 
-      {showJunctionMarker && (
-        <group>
-          {/* simple junction marker */}
-          <mesh position={[0, baseTopY + churchCube.height / 2, 0]} castShadow>
-            <boxGeometry args={[churchCube.size, churchCube.height, churchCube.size]} />
-            <meshStandardMaterial color={junctionMarkerColor} transparent opacity={opacity} />
-          </mesh>
-        </group>
-      )}
+      {isChurch && <group position={[0, baseTopY, 0]} rotation={[0, -rotation * Math.PI / 180, 0]}><Monastery opacity={opacity} /></group>}
+
+      {showJunctionMarker && <group position={[0, baseTopY + 0.02, 0]} rotation={[0, -rotation * Math.PI / 180, 0]}>
+        <House position={[-0.067, 0, -0.06]} scale={0.7} opacity={opacity} />
+        <House position={[0.067, 0, -0.045]} scale={0.65} roof="#796248" opacity={opacity} />
+        <House position={[0.012, 0, 0.065]} scale={0.7} roof="#a46b43" opacity={opacity} />
+      </group>}
 
       {/* City triangles + walls around them */}
       {cityGroups.map((group, gi) => {
@@ -552,85 +492,52 @@ export function TileMesh(props: {
               ? wallsForOppositeConnectedCity(group, wallY, WALL_THICKNESS, WALL_HEIGHT)
               : wallsForCityGroup(group, hub, wallY, WALL_THICKNESS, WALL_HEIGHT)
             ).map((s, idx) => (
-              <mesh key={`${gi}-group-wall-${idx}`} position={s.pos} rotation={[0, s.rotY, 0]} castShadow>
-                <boxGeometry args={s.size} />
-                <meshStandardMaterial color={wallColor} transparent opacity={opacity} />
-              </mesh>
+              <group key={`${gi}-group-wall-${idx}`} position={s.pos} rotation={[0, s.rotY, 0]}>
+                <CastleWall thickness={s.size[0]} height={s.size[1]} length={s.size[2]} opacity={opacity} />
+              </group>
             ))}
           </group>
         );
       })}
 
-      {/* Roads: reach center from edges */}
-      {edges.N.road && (
-        <mesh position={[0, roadY, -0.25]} castShadow>
-          <boxGeometry args={[ROAD_WIDTH, ROAD_THICKNESS, 0.5]} />
-          <meshStandardMaterial color={roadColor} transparent opacity={opacity} />
-        </mesh>
-      )}
-      {edges.S.road && (
-        <mesh position={[0, roadY, 0.25]} castShadow>
-          <boxGeometry args={[ROAD_WIDTH, ROAD_THICKNESS, 0.5]} />
-          <meshStandardMaterial color={roadColor} transparent opacity={opacity} />
-        </mesh>
-      )}
-      {edges.W.road && (
-        <mesh position={[-0.25, roadY, 0]} castShadow>
-          <boxGeometry args={[0.5, ROAD_THICKNESS, ROAD_WIDTH]} />
-          <meshStandardMaterial color={roadColor} transparent opacity={opacity} />
-        </mesh>
-      )}
-      {edges.E.road && (
-        <mesh position={[0.25, roadY, 0]} castShadow>
-          <boxGeometry args={[0.5, ROAD_THICKNESS, ROAD_WIDTH]} />
-          <meshStandardMaterial color={roadColor} transparent opacity={opacity} />
-        </mesh>
-      )}
+      {/* Reserve the middle of every city edge for meeples. */}
+      {cityGroups.flatMap((group, gi) => group.map((dir, di) => (
+        <group key={`buildings-${gi}-${dir}`} rotation={[0, DIR_ANGLE[dir], 0]}>
+          <House position={[-0.18, cityTopY, -0.38]} scale={0.85} opacity={opacity} />
+          <group position={[0.18, cityTopY, -0.38]}>
+            <Tower opacity={opacity} />
+            {def.hasShield && gi === 0 && di === 0 && <group position={[0, 0.245, 0]} rotation={[-Math.PI / 4, 0, 0]} scale={0.65}>
+              <mesh geometry={SHIELD_GEOM} castShadow>
+                <meshStandardMaterial color={shieldColor} metalness={0.25} roughness={0.5} transparent opacity={opacity} />
+              </mesh>
+              <mesh position={[0, 0, 0.012]}>
+                <boxGeometry args={[0.015, 0.13, 0.004]} />
+                <meshStandardMaterial color="#ead49c" transparent opacity={opacity} />
+              </mesh>
+              <mesh position={[0, 0.023, 0.012]}>
+                <boxGeometry args={[0.09, 0.014, 0.004]} />
+                <meshStandardMaterial color="#ead49c" transparent opacity={opacity} />
+              </mesh>
+            </group>}
+          </group>
+        </group>
+      )))}
 
-      {(edges.N.road || edges.E.road || edges.S.road || edges.W.road) && (
-        <mesh position={[0, roadY, 0]} castShadow>
-          <boxGeometry args={[ROAD_WIDTH, ROAD_THICKNESS, ROAD_WIDTH]} />
-          <meshStandardMaterial color={roadColor} transparent opacity={opacity} />
-        </mesh>
-      )}
-
-      {def.hasShield && (
-        <mesh
-          geometry={SHIELD_GEOM}
-          position={(() => {
-            // Keep centered for the fully-city tile (matches your reference).
-            if (def.id === "city_full_shield" || def.id === "city_opposite_connected_shield")
-              return [0, shieldY, 0] as [number, number, number];
-
-            // Otherwise, push towards the nearest "city" corner.
-            const cityN = edges.N.terrain === "city";
-            const cityE = edges.E.terrain === "city";
-            const cityS = edges.S.terrain === "city";
-            const cityW = edges.W.terrain === "city";
-
-            const corners = [
-              { x: -0.24, z: -0.24, score: (cityN ? 1 : 0) + (cityW ? 1 : 0) }, // NW
-              { x: 0.24, z: -0.24, score: (cityN ? 1 : 0) + (cityE ? 1 : 0) }, // NE
-              { x: 0.24, z: 0.24, score: (cityS ? 1 : 0) + (cityE ? 1 : 0) }, // SE
-              { x: -0.24, z: 0.24, score: (cityS ? 1 : 0) + (cityW ? 1 : 0) }, // SW
-            ];
-
-            corners.sort((a, b) => b.score - a.score);
-            const best = corners[0];
-            return [best.x, shieldY, best.z] as [number, number, number];
-          })()}
-          rotation={[-Math.PI / 2, 0, 0]}
-          castShadow
-        >
-          <meshStandardMaterial color={shieldColor} transparent opacity={opacity} />
-        </mesh>
-      )}
+      {(["N", "E", "S", "W"] as const).filter(dir => edges[dir].road).map(dir => (
+        <group key={`road-${dir}`} position={[0, roadY + ROAD_THICKNESS / 2, 0]} rotation={[0, DIR_ANGLE[dir], 0]}>
+          <MedievalRoad opacity={opacity} />
+        </group>
+      ))}
+      {roadCount > 0 && <mesh position={[0, roadY + ROAD_THICKNESS / 2 + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <circleGeometry args={[0.083, 16]} />
+        <meshStandardMaterial color="#b59a6d" roughness={1} transparent opacity={opacity} />
+      </mesh>}
 
       {/* Placed meeples */}
       {meeples.map((m, i) => {
         const c = colorForPlayer((m as unknown as { player?: number }).player);
         if (m.feature.kind === "church") {
-          return <MeepleMesh key={`meeple-${i}`} color={c} scale={1.0} position={[0, meepleY, 0]} />;
+          return <MeepleMesh key={`meeple-${i}`} color={c} scale={1.0} position={[0, churchTopY + 0.01, 0]} />;
         }
         if (m.feature.kind === "road") {
           return (
@@ -664,7 +571,7 @@ export function TileMesh(props: {
               </mesh>
               {/* invisible hitbox */}
               <mesh
-                position={[0, meepleY + 0.03, 0]}
+                position={[0, hintCenterY(churchTopY), 0]}
                 onClick={(e) => {
                   e.stopPropagation();
                   onMeepleFeatureClick({ kind: "church" });

@@ -1,3 +1,4 @@
+import { browserSaves } from "./browserSaves";
 import { create } from "zustand";
 import type { Coord, EdgeDir, GameState, MeepleFeature, Rotation, TileDefinition, TileId } from "../model/types";
 import { START_TILE_ID, TILESET, buildInitialDeck } from "../model/tileset";
@@ -61,10 +62,6 @@ type SavePayloadV1 = {
 
 function canUseLocalStorage(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-}
-
-function canUseFetch(): boolean {
-  return typeof window !== "undefined" && typeof window.fetch === "function";
 }
 
 function isSavePayloadV1(x: unknown): x is SavePayloadV1 {
@@ -601,69 +598,43 @@ export const useGameStore = create<Store>((set, get) => ({
   meepleTarget: null,
 
   saveGameFile: async (label?: string, mode?: SaveMode) => {
-    if (!canUseFetch()) return { ok: false, reason: "fetch is not available" };
     try {
       const s = get();
       const resolvedMode: SaveMode = mode ?? ((s.playerCount ?? 1) > 1 ? "multi" : "solo");
-      const res = await fetch("/api/saves", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          label,
-          mode: resolvedMode,
-          state: {
-            board: s.board,
-            deck: s.deck,
-            active: s.active,
-            score: s.score,
-            playerCount: s.playerCount,
-            currentPlayer: s.currentPlayer,
-            scores: s.scores,
-            meeplesRemaining: s.meeplesRemaining,
-            meeplesRemainingByPlayer: s.meeplesRemainingByPlayer,
-            meeples: s.meeples,
-            meepleTarget: s.meepleTarget,
-          },
-        }),
-      });
-      const data = (await res.json()) as { ok: boolean; reason?: string; id?: string };
-      if (!res.ok || !data.ok) return { ok: false, reason: data.reason ?? "Failed to save" };
-      return { ok: true, id: data.id };
+      const id = browserSaves.save(resolvedMode, {
+        board: s.board,
+        deck: s.deck,
+        active: s.active,
+        score: s.score,
+        playerCount: s.playerCount,
+        currentPlayer: s.currentPlayer,
+        scores: s.scores,
+        meeplesRemaining: s.meeplesRemaining,
+        meeplesRemainingByPlayer: s.meeplesRemainingByPlayer,
+        meeples: s.meeples,
+        meepleTarget: s.meepleTarget,
+      }, label);
+      return { ok: true, id };
     } catch (e) {
       return { ok: false, reason: e instanceof Error ? e.message : "Failed to save" };
     }
   },
 
   listGameFiles: async (mode?: SaveMode) => {
-    if (!canUseFetch()) return { ok: false, reason: "fetch is not available" };
     try {
       const s = get();
       const resolvedMode: SaveMode = mode ?? ((s.playerCount ?? 1) > 1 ? "multi" : "solo");
-      const res = await fetch(`/api/saves?mode=${encodeURIComponent(resolvedMode)}`, { method: "GET" });
-      const data = (await res.json()) as {
-        ok: boolean;
-        reason?: string;
-        saves?: Array<{ id: string; savedAt: number; label?: string }>;
-      };
-      if (!res.ok || !data.ok) return { ok: false, reason: data.reason ?? "Failed to list" };
-      return { ok: true, saves: data.saves ?? [] };
+      return { ok: true, saves: browserSaves.list(resolvedMode) };
     } catch (e) {
       return { ok: false, reason: e instanceof Error ? e.message : "Failed to list" };
     }
   },
 
   loadGameFile: async (id: string, mode?: SaveMode) => {
-    if (!canUseFetch()) return { ok: false, reason: "fetch is not available" };
     try {
       const s = get();
       const resolvedMode: SaveMode = mode ?? ((s.playerCount ?? 1) > 1 ? "multi" : "solo");
-      const res = await fetch(`/api/saves/${encodeURIComponent(id)}?mode=${encodeURIComponent(resolvedMode)}`, {
-        method: "GET",
-      });
-      const data = (await res.json()) as { ok: boolean; reason?: string; save?: { state?: unknown } };
-      if (!res.ok || !data.ok) return { ok: false, reason: data.reason ?? "Failed to load" };
-
-      const state = data.save?.state as
+      const state = browserSaves.load(resolvedMode, id)?.state as
         | Partial<
             Pick<
               GameState,
@@ -720,15 +691,10 @@ export const useGameStore = create<Store>((set, get) => ({
   },
 
   deleteGameFile: async (id: string, mode?: SaveMode) => {
-    if (!canUseFetch()) return { ok: false, reason: "fetch is not available" };
     try {
       const s = get();
       const resolvedMode: SaveMode = mode ?? ((s.playerCount ?? 1) > 1 ? "multi" : "solo");
-      const res = await fetch(`/api/saves/${encodeURIComponent(id)}?mode=${encodeURIComponent(resolvedMode)}`, {
-        method: "DELETE",
-      });
-      const data = (await res.json()) as { ok: boolean; reason?: string };
-      if (!res.ok || !data.ok) return { ok: false, reason: data.reason ?? "Failed to delete" };
+      browserSaves.delete(resolvedMode, id);
       return { ok: true };
     } catch (e) {
       return { ok: false, reason: e instanceof Error ? e.message : "Failed to delete" };

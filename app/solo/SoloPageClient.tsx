@@ -15,7 +15,6 @@ export default function SoloPageClient() {
   const initGameWithPlayers = useGameStore((s) => s.initGameWithPlayers);
   const loadGame = useGameStore((s) => s.loadGame);
   const loadGameFile = useGameStore((s) => s.loadGameFile);
-  const saveGame = useGameStore((s) => s.saveGame);
   const saveGameFile = useGameStore((s) => s.saveGameFile);
   const rotateActive = useGameStore((s) => s.rotateActive);
   const endGameEarly = useGameStore((s) => s.endGameEarly);
@@ -136,11 +135,10 @@ export default function SoloPageClient() {
     }
 
     setSaving(true);
-    const localRes = saveGame();
     const fileRes = await saveGameFile(trimmed);
     setSaving(false);
 
-    if (localRes.ok && fileRes.ok) {
+    if (fileRes.ok) {
       setIsErr(false);
       setMsg("Збережено.");
       setSaveModalOpen(false);
@@ -148,14 +146,8 @@ export default function SoloPageClient() {
       return;
     }
 
-    if (!localRes.ok) {
-      setIsErr(true);
-      setMsg(`Не вдалося зберегти: ${localRes.reason}`);
-      return;
-    }
-
     setIsErr(true);
-    setMsg(`Локально збережено, але файл-сейв не записався: ${fileRes.reason}`);
+    setMsg(`Не вдалося зберегти: ${fileRes.reason}`);
   }
 
   return (
@@ -242,7 +234,7 @@ export default function SoloPageClient() {
 
           <div className="relative w-full max-w-md rounded-3xl border border-foreground/20 bg-background/80 backdrop-blur px-6 py-6 pointer-events-auto">
             <div className="text-lg font-semibold">Зберегти гру</div>
-            <div className="text-sm opacity-80 mt-1">Введи назву сейва</div>
+            <div className="text-sm opacity-80 mt-1">Введи назву сейва · Зберігається в цьому браузері</div>
 
             <form
               className="mt-4 grid gap-3"

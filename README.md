@@ -9,7 +9,7 @@ A small Carcassonne-style web game built with Next.js + React Three Fiber.
 - **Solo** mode
 - **Multiplayer Offline** (hotseat, 1–5 players, turn-by-turn)
 - **Multiplayer Online (LAN)** rooms (Socket.IO, simplest host-authoritative model)
-- **File saves** (separate save buckets for solo vs multiplayer)
+- **Browser saves** (separate save buckets for solo vs multiplayer)
 - **Rules**: in-app “Site rules” + external PDF “Game rules” link
 
 ## Controls
@@ -20,7 +20,7 @@ A small Carcassonne-style web game built with Next.js + React Three Fiber.
 
 ## Requirements
 
-- Node.js 18+ (recommended)
+- Node.js 22.18+
 
 ## Run locally
 
@@ -49,12 +49,26 @@ Then use **Multiplayer → Online** (or open `/online`) to create/join a room.
 
 ## Saves
 
-File saves are written as JSON files under:
+Named saves live in your browser's localStorage, with separate Solo and Multiplayer lists. Other browsers/devices do not see them, even when connected to the same server. No account is required. People sharing the same browser profile share its saves.
 
-- `src/game/store/save/saves/solo/`
-- `src/game/store/save/saves/multi/`
+Saves survive application/container restarts, but clearing site data removes them. A different host or port has separate storage. Old server JSON saves are no longer exposed or automatically imported; existing local copies remain untouched and are excluded from Git and Docker.
 
-These are dev-friendly local files (they are not meant for serverless deployments where the filesystem is ephemeral).
+## Docker
+
+```bash
+docker build -t carcassonne:local .
+docker run --rm -p 4000:4000 --name carcassonne carcassonne:local
+```
+
+Open http://localhost:4000 (or http://<HOST_LAN_IP>:4000 on your LAN). Next.js and Socket.IO share this port. No save volume is required. Online rooms are in memory and end when the server restarts.
+
+## Checks
+
+```bash
+npm test
+npx tsc --noEmit
+npm run build
+```
 
 ## Project map (high level)
 

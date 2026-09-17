@@ -39,3 +39,22 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Personal saves and unused local design references
+/src/game/store/save/saves/
+/11.jpg
+/12.jpg
+/13.jpg
+/14.jpg
+/15.jpg
+/16.jpg
+/17.jpg
+/norm.jpg
+/teory.jpg
+/letsgo
+/mock-home-fantasy.html
+/public/file.svg
+/public/globe.svg
+/public/next.svg
+/public/vercel.svg
+/public/window.svg
